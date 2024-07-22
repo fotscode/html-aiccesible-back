@@ -1,0 +1,17 @@
+# Choose whatever you want, version >= 1.16
+FROM golang:1.22-alpine
+
+WORKDIR /app
+
+ENV APP_PORT=8080
+
+COPY src/ src/
+WORKDIR /app/src
+
+RUN go mod download
+
+RUN go build -trimpath -o /tmp/main .
+
+EXPOSE $APP_PORT
+
+CMD ["/tmp/main"]
