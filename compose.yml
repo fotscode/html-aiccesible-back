@@ -1,12 +1,25 @@
-version: "3.8"
+version: '3.8'
 services:
   web:
     build:
       context: .
-      # Correct the path to your Dockerfile
       dockerfile: Dockerfile.local
     ports:
       - 8080:8080
-    # Important to bind/mount your codebase dir to /app dir for live reload
+    networks:
+      - server_client
     volumes:
       - ./:/app
+  mysql-test:
+    image: mysql
+    restart: always
+    env_file: db.env
+    networks:
+      - server_client
+    ports:
+      - 3306:3306
+    volumes:
+      - ./volumes/mysql_volume:/var/lib/mysql
+
+networks:
+  server_client:
