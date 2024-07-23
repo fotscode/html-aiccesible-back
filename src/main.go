@@ -1,15 +1,8 @@
-package main
-
-import (
-	"html-aiccesible/httputil"
-
-	"github.com/gin-gonic/gin"
-)
+ package main
+ 
+import routes "html-aiccesible/routes"
 
 func main() {
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		httputil.OK(c, "Hello, World!")
-	})
+	r := routes.SetUpRouter()
 	r.Run()
 }
