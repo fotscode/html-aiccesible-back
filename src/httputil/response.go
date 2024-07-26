@@ -40,3 +40,7 @@ func InternalServerError[T any](c *gin.Context, data T) {
 func NoContent[T any](c *gin.Context, data T) {
 	c.AbortWithStatusJSON(http.StatusNoContent, newHTTPResponse(http.StatusNoContent, data))
 }
+
+func Unauthorized[T any](c *gin.Context, data T) {
+	c.AbortWithStatusJSON(http.StatusUnauthorized, newHTTPResponse(http.StatusUnauthorized, data))
+}
