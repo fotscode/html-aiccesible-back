@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   web:
+    container_name: backend
     build:
       context: .
       dockerfile: Dockerfile.local
@@ -12,6 +13,7 @@ services:
     volumes:
       - ./:/app
   mysql-test:
+    container_name: mysql
     image: mysql
     restart: always
     env_file: db.env
