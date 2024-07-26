@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"html-aiccesible/httputil"
+	"html-aiccesible/models"
 	"html-aiccesible/repositories"
 	"os"
 	"time"
@@ -53,6 +54,18 @@ func RequireAuth() gin.HandlerFunc {
 			c.Next()
 		} else {
 			httputil.Unauthorized[string](c, "Invalid token")
+			return
+		}
+		c.Next()
+	}
+}
+
+func RequireAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := c.MustGet("user").(*models.User)
+		if user.Username != os.Getenv("ADMIN_USERNAME") {
+			httputil.Forbidden[string](c, "You are not allowed to access this resource")
+			return
 		}
 		c.Next()
 	}
