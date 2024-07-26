@@ -1,14 +1,16 @@
 package repositories
 
 import (
-	"html-aiccesible/models"
-
+	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"html-aiccesible/models"
 )
 
 type Repository interface {
 	CreateUser(userBody *models.CreateUserBody) (*models.User, error)
 	GetUser(id int) (*models.User, error)
+	GetUserByUsername(username string) (*models.User, error)
 	UpdateUser(userBody *models.UpdateUserBody) (*models.User, error)
 	DeleteUser(id int) error
 	ListUsers(page, size int) ([]models.User, error)
@@ -25,9 +27,13 @@ func UserRepo() Repository {
 }
 
 func (r *userRepository) CreateUser(userBody *models.CreateUserBody) (*models.User, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(userBody.Password), 10)
+	if err != nil {
+		return nil, err
+	}
 	user := &models.User{
 		Username: userBody.Username,
-		Password: userBody.Password,
+		Password: string(hash),
 	}
 	res := r.DB.Create(user)
 	if res.Error != nil {
@@ -45,19 +51,28 @@ func (r *userRepository) GetUser(id int) (*models.User, error) {
 	return &user, nil
 }
 
+func (r *userRepository) GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	res := r.DB.Where("username = ?", username).First(&user)
+	if res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, res.Error
+	}
+	return &user, nil
+}
+
 func (r *userRepository) UpdateUser(userBody *models.UpdateUserBody) (*models.User, error) {
 	user := &models.User{
-		Model: gorm.Model{
-			ID: userBody.ID,
-		},
 		Username: userBody.Username,
 		Password: userBody.Password,
 	}
-	res := r.DB.Save(user)
+	res := r.DB.Model(&models.User{}).Where("id = ?", userBody.ID).Updates(user)
 	if res.Error != nil {
 		return nil, res.Error
 	}
-	return user, nil
+	return r.GetUser(int(userBody.ID))
 }
 
 func (r *userRepository) DeleteUser(id int) error {
