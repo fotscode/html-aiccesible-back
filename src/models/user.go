@@ -6,8 +6,8 @@ import (
 
 type User struct {
 	gorm.Model
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" gorm:"unique"`
+	Password string `json:"-"`
 	// TODO: add more fields
 	// Posts      Post[]
 	// Comments   Comment[]
@@ -21,7 +21,16 @@ type CreateUserBody struct {
 }
 
 type UpdateUserBody struct {
-    ID       uint   `json:"id" binding:"required"`
+	ID       uint   `json:"id" binding:"required"`
 	Username string `json:"username" validate:"required,min=4,max=20"`
 	Password string `json:"password" validate:"required,min=8,max=20"`
+}
+
+type LoginUserBody struct {
+	Username string `json:"username" binding:"required,min=4,max=20"`
+	Password string `json:"password" binding:"required,min=8,max=20"`
+}
+
+type LoginResponse struct {
+	Token string `json:"token"`
 }
