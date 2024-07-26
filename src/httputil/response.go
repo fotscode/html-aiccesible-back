@@ -44,3 +44,7 @@ func NoContent[T any](c *gin.Context, data T) {
 func Unauthorized[T any](c *gin.Context, data T) {
 	c.AbortWithStatusJSON(http.StatusUnauthorized, newHTTPResponse(http.StatusUnauthorized, data))
 }
+
+func Forbidden[T any](c *gin.Context, data T) {
+	c.AbortWithStatusJSON(http.StatusForbidden, newHTTPResponse(http.StatusForbidden, data))
+}
