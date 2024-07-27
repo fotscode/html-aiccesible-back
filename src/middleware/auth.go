@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func RequireAuth() gin.HandlerFunc {
+func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 
@@ -60,7 +60,7 @@ func RequireAuth() gin.HandlerFunc {
 	}
 }
 
-func RequireAdmin() gin.HandlerFunc {
+func Admin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := c.MustGet("user").(*models.User)
 		if user.Username != os.Getenv("ADMIN_USERNAME") {
