@@ -4,7 +4,6 @@ import (
 	"html-aiccesible/httputil"
 	"html-aiccesible/models"
 	"os"
-	"strconv"
 	"time"
 
 	"html-aiccesible/repositories"
@@ -35,28 +34,18 @@ func (b *Controller) UpdateUser(c *gin.Context) {
 }
 
 func (b *Controller) GetUser(c *gin.Context) {
-	id := c.Param("id")
-	idInt, err := strconv.Atoi(id)
+	getOpt := c.MustGet("getOpt").(*models.GetOptions)
+	user, err := repositories.UserRepo().GetUser(getOpt.Id)
 	if err != nil {
-		httputil.BadRequest[string](c, "Invalid ID")
-		return
-	}
-	user, err := repositories.UserRepo().GetUser(idInt)
-	if err != nil {
-		httputil.InternalServerError[string](c, err.Error())
+		httputil.NotFound(c, err.Error())
 		return
 	}
 	httputil.OK[*models.User](c, user)
 }
 
 func (b *Controller) DeleteUser(c *gin.Context) {
-	id := c.Param("id") // TODO: middleware for all ID params
-	idInt, err := strconv.Atoi(id)
-	if err != nil {
-		httputil.BadRequest[string](c, "Invalid ID")
-		return
-	}
-	err = repositories.UserRepo().DeleteUser(idInt)
+	getOpt := c.MustGet("getOpt").(*models.GetOptions)
+	err := repositories.UserRepo().DeleteUser(getOpt.Id)
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
 		return
@@ -65,17 +54,8 @@ func (b *Controller) DeleteUser(c *gin.Context) {
 }
 
 func (b *Controller) ListUsers(c *gin.Context) {
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1")) // TODO: middleware for all lists
-	if err != nil {
-		httputil.BadRequest[string](c, "Invalid page")
-		return
-	}
-	size, err := strconv.Atoi(c.DefaultQuery("size", "10"))
-	if err != nil {
-		httputil.BadRequest[string](c, "Invalid size")
-		return
-	}
-	users, err := repositories.UserRepo().ListUsers(page, size)
+	lo := c.MustGet("lo").(*models.ListOptions)
+	users, err := repositories.UserRepo().ListUsers(lo.Page, lo.Size)
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
 		return
