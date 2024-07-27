@@ -8,7 +8,7 @@ type User struct {
 	gorm.Model
 	Username string        `json:"username" gorm:"unique"`
 	Password string        `json:"-"`
-	Config   Configuration `json:"config"`
+	Config   Configuration `json:"-"`
 	// TODO: add more fields
 	// Posts      Post[]
 	// Comments   Comment[]
