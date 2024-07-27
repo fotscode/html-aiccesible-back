@@ -16,9 +16,9 @@ type configRepository struct {
 	DB *gorm.DB
 }
 
-func ConfigRepo() ConfigRepository {
+func ConfigRepo(db *gorm.DB) ConfigRepository {
 	return &configRepository{
-		DB: models.GetDB(),
+		DB: db,
 	}
 }
 
