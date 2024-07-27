@@ -19,7 +19,10 @@ func GetDB() *gorm.DB {
 		if err != nil {
 			panic("failed to connect database")
 		}
-		gormDB.AutoMigrate(&User{})
+		gormDB.AutoMigrate(
+			&User{},
+			&Configuration{},
+		)
 		db = gormDB
 	}
 	return db
@@ -38,10 +41,11 @@ func getDsn() string {
 
 func CreateDefaultUser() {
 	db := GetDB()
+	username := os.Getenv("ADMIN_USERNAME")
 	var user User
-	db.Where("username = ?", os.Getenv("ADMIN_USERNAME")).First(&user)
+	db.Where("username = ?", username).First(&user)
 	if user.ID == 0 {
-		user.Username = os.Getenv("ADMIN_USERNAME")
+		user.Username = username
 		pwd := os.Getenv("ADMIN_PASSWORD")
 		cost, err := strconv.Atoi(os.Getenv("BCRYPT_COST"))
 		if err != nil {
@@ -52,6 +56,7 @@ func CreateDefaultUser() {
 			panic(err)
 		}
 		user.Password = string(hash)
+		user.Config = FillConfigDefaults(&Configuration{})
 		db.Create(&user)
 	}
 }
