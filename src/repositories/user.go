@@ -23,9 +23,9 @@ type userRepository struct {
 	DB *gorm.DB
 }
 
-func UserRepo() UserRepository {
+func UserRepo(db *gorm.DB) UserRepository {
 	return &userRepository{
-		DB: models.GetDB(),
+		DB: db,
 	}
 }
 

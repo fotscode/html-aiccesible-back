@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"fmt"
+	"html-aiccesible/controllers"
 	"html-aiccesible/httputil"
 	"html-aiccesible/models"
-	"html-aiccesible/repositories"
 	"os"
 	"time"
 
@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func Auth() gin.HandlerFunc {
+func Auth(ctrl *controllers.Controller) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 
@@ -45,7 +45,7 @@ func Auth() gin.HandlerFunc {
 				httputil.Unauthorized[string](c, "Invalid token")
 				return
 			}
-			user, err := repositories.UserRepo().GetUser(int(id.(float64)))
+			user, err := ctrl.UserRepo.GetUser(int(id.(float64)))
 			if err != nil {
 				httputil.Unauthorized[string](c, "Invalid token")
 				return

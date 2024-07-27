@@ -6,8 +6,6 @@ import (
 	"os"
 	"time"
 
-	"html-aiccesible/repositories"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -15,7 +13,7 @@ import (
 
 func (b *Controller) CreateUser(c *gin.Context) {
 	body := c.MustGet(gin.BindKey).(*models.CreateUserBody)
-	user, err := repositories.UserRepo().CreateUser(body)
+	user, err := b.UserRepo.CreateUser(body)
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
 		return
@@ -25,7 +23,7 @@ func (b *Controller) CreateUser(c *gin.Context) {
 
 func (b *Controller) UpdateUser(c *gin.Context) {
 	body := c.MustGet(gin.BindKey).(*models.UpdateUserBody)
-	user, err := repositories.UserRepo().UpdateUser(body)
+	user, err := b.UserRepo.UpdateUser(body)
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
 		return
@@ -35,7 +33,7 @@ func (b *Controller) UpdateUser(c *gin.Context) {
 
 func (b *Controller) GetUser(c *gin.Context) {
 	getOpt := c.MustGet("getOpt").(*models.GetOptions)
-	user, err := repositories.UserRepo().GetUser(getOpt.Id)
+	user, err := b.UserRepo.GetUser(getOpt.Id)
 	if err != nil {
 		httputil.NotFound(c, err.Error())
 		return
@@ -45,7 +43,7 @@ func (b *Controller) GetUser(c *gin.Context) {
 
 func (b *Controller) DeleteUser(c *gin.Context) {
 	getOpt := c.MustGet("getOpt").(*models.GetOptions)
-	err := repositories.UserRepo().DeleteUser(getOpt.Id)
+	err := b.UserRepo.DeleteUser(getOpt.Id)
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
 		return
@@ -55,7 +53,7 @@ func (b *Controller) DeleteUser(c *gin.Context) {
 
 func (b *Controller) ListUsers(c *gin.Context) {
 	lo := c.MustGet("lo").(*models.ListOptions)
-	users, err := repositories.UserRepo().ListUsers(lo.Page, lo.Size)
+	users, err := b.UserRepo.ListUsers(lo.Page, lo.Size)
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
 		return
@@ -65,7 +63,7 @@ func (b *Controller) ListUsers(c *gin.Context) {
 
 func (b *Controller) Login(c *gin.Context) {
 	body := c.MustGet(gin.BindKey).(*models.LoginUserBody)
-	user, err := repositories.UserRepo().GetUserByUsername(body.Username)
+	user, err := b.UserRepo.GetUserByUsername(body.Username)
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
 		return
