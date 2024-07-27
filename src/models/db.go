@@ -3,9 +3,7 @@ package models
 import (
 	"fmt"
 	"os"
-	"strconv"
 
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 
 	"gorm.io/gorm"
@@ -47,15 +45,11 @@ func CreateDefaultUser() {
 	if user.ID == 0 {
 		user.Username = username
 		pwd := os.Getenv("ADMIN_PASSWORD")
-		cost, err := strconv.Atoi(os.Getenv("BCRYPT_COST"))
-		if err != nil {
-			panic("BCRYPT_COST must be an integer")
-		}
-		hash, err := bcrypt.GenerateFromPassword([]byte(pwd), cost)
+		hash, err := HashPassword(pwd)
 		if err != nil {
 			panic(err)
 		}
-		user.Password = string(hash)
+		user.Password = hash
 		user.Config = FillConfigDefaults(&Configuration{})
 		db.Create(&user)
 	}
