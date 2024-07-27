@@ -29,16 +29,20 @@ func Created[T any](c *gin.Context, data T) {
 	c.JSON(http.StatusCreated, newHTTPResponse(http.StatusOK, data))
 }
 
+func NoContent[T any](c *gin.Context, data T) {
+	c.AbortWithStatusJSON(http.StatusNoContent, newHTTPResponse(http.StatusNoContent, data))
+}
+
 func BadRequest[T any](c *gin.Context, data T) {
 	c.AbortWithStatusJSON(http.StatusBadRequest, newHTTPResponse(http.StatusBadRequest, data))
 }
 
-func InternalServerError[T any](c *gin.Context, data T) {
-	c.AbortWithStatusJSON(http.StatusInternalServerError, newHTTPResponse(http.StatusInternalServerError, data))
+func NotFound[T any](c *gin.Context, data T) {
+	c.AbortWithStatusJSON(http.StatusNotFound, newHTTPResponse(http.StatusNotFound, data))
 }
 
-func NoContent[T any](c *gin.Context, data T) {
-	c.AbortWithStatusJSON(http.StatusNoContent, newHTTPResponse(http.StatusNoContent, data))
+func InternalServerError[T any](c *gin.Context, data T) {
+	c.AbortWithStatusJSON(http.StatusInternalServerError, newHTTPResponse(http.StatusInternalServerError, data))
 }
 
 func Unauthorized[T any](c *gin.Context, data T) {

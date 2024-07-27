@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Repository interface {
+type UserRepository interface {
 	CreateUser(userBody *models.CreateUserBody) (*models.User, error)
 	GetUser(id int) (*models.User, error)
 	GetUserByUsername(username string) (*models.User, error)
@@ -23,7 +23,7 @@ type userRepository struct {
 	DB *gorm.DB
 }
 
-func UserRepo() Repository {
+func UserRepo() UserRepository {
 	return &userRepository{
 		DB: models.GetDB(),
 	}
@@ -41,6 +41,7 @@ func (r *userRepository) CreateUser(userBody *models.CreateUserBody) (*models.Us
 	user := &models.User{
 		Username: userBody.Username,
 		Password: string(hash),
+		Config:   models.FillConfigDefaults(&models.Configuration{}),
 	}
 	res := r.DB.Create(user)
 	if res.Error != nil {

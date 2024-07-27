@@ -24,6 +24,11 @@ func SetUpRouter() *gin.Engine {
 			user.GET("/list", c.ListUsers)
 			user.POST("/login", gin.Bind(models.LoginUserBody{}), c.Login)
 		}
+		config := api.Group("/config", m.RequireAuth())
+		{
+			config.GET("/get", c.GetConfig)
+			config.PUT("/update", gin.Bind(models.UpdateConfigBody{}), c.UpdateConfig)
+		}
 	}
 	return r
 }

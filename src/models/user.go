@@ -6,13 +6,13 @@ import (
 
 type User struct {
 	gorm.Model
-	Username string `json:"username" gorm:"unique"`
-	Password string `json:"-"`
+	Username string        `json:"username" gorm:"unique"`
+	Password string        `json:"-"`
+	Config   Configuration `json:"config"`
 	// TODO: add more fields
 	// Posts      Post[]
 	// Comments   Comment[]
 	// Likes      Post[]
-	// Config     Configuration
 }
 
 type CreateUserBody struct {
