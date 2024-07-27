@@ -1,6 +1,10 @@
 package models
 
 import (
+	"os"
+	"strconv"
+
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -33,4 +37,16 @@ type LoginUserBody struct {
 
 type LoginResponse struct {
 	Token string `json:"token"`
+}
+
+func HashPassword(password string) (string, error) {
+	cost, err := strconv.Atoi(os.Getenv("BCRYPT_COST"))
+	if err != nil {
+		panic("BCRYPT_COST must be an integer")
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), cost)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
 }
