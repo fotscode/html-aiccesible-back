@@ -1,9 +1,9 @@
 package controllers
 
 import (
+	ct "html-aiccesible/constants"
 	"html-aiccesible/httputil"
 	"html-aiccesible/models"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -80,8 +80,8 @@ func (b *Controller) Login(c *gin.Context) {
 	}
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	}).SignedString([]byte(os.Getenv("JWT_SECRET")))
+		"exp": time.Now().Add(time.Hour * 24 * 14).Unix(),
+	}).SignedString([]byte(ct.JWT_SECRET))
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
 		return
