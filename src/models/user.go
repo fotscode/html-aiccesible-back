@@ -1,7 +1,7 @@
 package models
 
 import (
-	"os"
+	ct "html-aiccesible/constants"
 	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
@@ -40,7 +40,7 @@ type LoginResponse struct {
 }
 
 func HashPassword(password string) (string, error) {
-	cost, err := strconv.Atoi(os.Getenv("BCRYPT_COST"))
+	cost, err := strconv.Atoi(ct.BCRYPT_COST)
 	if err != nil {
 		panic("BCRYPT_COST must be an integer")
 	}

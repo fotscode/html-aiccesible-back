@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"fmt"
+	ct "html-aiccesible/constants"
 	"html-aiccesible/controllers"
 	"html-aiccesible/httputil"
 	"html-aiccesible/models"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +32,7 @@ func Auth(ctrl *controllers.Controller) gin.HandlerFunc {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
 
-			return []byte(os.Getenv("JWT_SECRET")), nil
+			return []byte(ct.JWT_SECRET), nil
 		})
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -63,7 +63,7 @@ func Auth(ctrl *controllers.Controller) gin.HandlerFunc {
 func Admin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := c.MustGet("user").(*models.User)
-		if user.Username != os.Getenv("ADMIN_USERNAME") {
+		if user.Username != ct.ADMIN_USERNAME {
 			httputil.Forbidden[string](c, "You are not allowed to access this resource")
 			return
 		}

@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"os"
+	ct "html-aiccesible/constants"
 
 	"gorm.io/driver/mysql"
 
@@ -28,23 +28,23 @@ func GetDB() *gorm.DB {
 
 func getDsn() string {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		os.Getenv("MYSQL_USER"),
-		os.Getenv("MYSQL_PASSWORD"),
-		os.Getenv("MYSQL_HOST"),
-		os.Getenv("MYSQL_PORT"),
-		os.Getenv("MYSQL_DATABASE"),
+		ct.MYSQL_USER,
+		ct.MYSQL_PASSWORD,
+		ct.MYSQL_HOST,
+		ct.MYSQL_PORT,
+		ct.MYSQL_DATABASE,
 	)
 	return dsn
 }
 
 func CreateDefaultUser() {
 	db := GetDB()
-	username := os.Getenv("ADMIN_USERNAME")
+	username := ct.ADMIN_USERNAME
 	var user User
 	db.Where("username = ?", username).First(&user)
 	if user.ID == 0 {
 		user.Username = username
-		pwd := os.Getenv("ADMIN_PASSWORD")
+		pwd := ct.ADMIN_PASSWORD
 		hash, err := HashPassword(pwd)
 		if err != nil {
 			panic(err)
