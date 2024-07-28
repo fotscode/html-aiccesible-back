@@ -2,12 +2,8 @@ package repositories
 
 import (
 	"errors"
-	"html-aiccesible/models"
-	"os"
-	"strconv"
-
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"html-aiccesible/models"
 )
 
 type UserRepository interface {
@@ -30,17 +26,13 @@ func UserRepo(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepository) CreateUser(userBody *models.CreateUserBody) (*models.User, error) {
-	cost, err := strconv.Atoi(os.Getenv("BCRYPT_COST")) // TODO: helper function
-	if err != nil {
-		panic("BCRYPT_COST must be an integer")
-	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(userBody.Password), cost)
+	hash, err := models.HashPassword(userBody.Password)
 	if err != nil {
 		return nil, err
 	}
 	user := &models.User{
 		Username: userBody.Username,
-		Password: string(hash),
+		Password: hash,
 		Config:   models.FillConfigDefaults(&models.Configuration{}),
 	}
 	res := r.DB.Create(user)
