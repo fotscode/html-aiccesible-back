@@ -10,13 +10,12 @@ import (
 
 type User struct {
 	gorm.Model
-	Username string        `json:"username" gorm:"unique"`
-	Password string        `json:"-"`
-	Config   Configuration `json:"-"`
-	// TODO: add more fields
-	// Posts      Post[]
-	// Comments   Comment[]
-	// Likes      Post[]
+	Username   string        `json:"username" gorm:"unique"`
+	Password   string        `json:"-"`
+	Config     Configuration `json:"-"`
+	Posts      []Post        `json:"-"`
+	LikedPosts []*Post       `json:"-" gorm:"many2many:post_likes;"`
+	Comments   []Comment     `json:"-"`
 }
 
 type CreateUserBody struct {
@@ -26,8 +25,8 @@ type CreateUserBody struct {
 
 type UpdateUserBody struct {
 	ID       uint   `json:"id" binding:"required"`
-	Username string `json:"username" validate:"required,min=4,max=20"`
-	Password string `json:"password" validate:"required,min=8,max=20"`
+	Username string `json:"username" binding:"required,min=4,max=20"`
+	Password string `json:"password" binding:"required,min=8,max=20"`
 }
 
 type LoginUserBody struct {
