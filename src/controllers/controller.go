@@ -8,6 +8,7 @@ import (
 type Controller struct {
 	UserRepo   repositories.UserRepository
 	ConfigRepo repositories.ConfigRepository
+	PostRepo   repositories.PostRepository
 }
 
 func NewController() *Controller {
@@ -15,5 +16,6 @@ func NewController() *Controller {
 	return &Controller{
 		UserRepo:   repositories.UserRepo(db),
 		ConfigRepo: repositories.ConfigRepo(db),
+		PostRepo:   repositories.PostRepo(db),
 	}
 }
