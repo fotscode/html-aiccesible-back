@@ -47,6 +47,9 @@ func (r *postRepository) UpdatePost(user *m.User, postBody *m.UpdatePostBody) (*
 	if err != nil {
 		return nil, err
 	}
+	if user.ID != post.UserID {
+		return nil, errors.New("user is not the owner of the post")
+	}
 	post.Title = postBody.Title
 	post.Description = postBody.Description
 	post.Before = postBody.Before
