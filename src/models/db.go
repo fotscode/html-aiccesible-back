@@ -20,6 +20,8 @@ func GetDB() *gorm.DB {
 		gormDB.AutoMigrate(
 			&User{},
 			&Configuration{},
+			&Post{},
+			&Comment{},
 		)
 		db = gormDB
 	}
