@@ -6,16 +6,18 @@ import (
 )
 
 type Controller struct {
-	UserRepo   repositories.UserRepository
-	ConfigRepo repositories.ConfigRepository
-	PostRepo   repositories.PostRepository
+	UserRepo    repositories.UserRepository
+	ConfigRepo  repositories.ConfigRepository
+	PostRepo    repositories.PostRepository
+	CommentRepo repositories.CommentRepository
 }
 
 func NewController() *Controller {
 	db := models.GetDB()
 	return &Controller{
-		UserRepo:   repositories.UserRepo(db),
-		ConfigRepo: repositories.ConfigRepo(db),
-		PostRepo:   repositories.PostRepo(db),
+		UserRepo:    repositories.UserRepo(db),
+		ConfigRepo:  repositories.ConfigRepo(db),
+		PostRepo:    repositories.PostRepo(db),
+		CommentRepo: repositories.CommentRepo(db),
 	}
 }
