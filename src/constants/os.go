@@ -12,6 +12,8 @@ var (
 	MYSQL_PORT     string
 	ADMIN_USERNAME string
 	ADMIN_PASSWORD string
+	OLLAMA_HOST    string
+	OLLAMA_PORT    string
 )
 
 func init() {
@@ -24,4 +26,6 @@ func init() {
 	MYSQL_PORT = os.Getenv("MYSQL_PORT")
 	ADMIN_USERNAME = os.Getenv("ADMIN_USERNAME")
 	ADMIN_PASSWORD = os.Getenv("ADMIN_PASSWORD")
+	OLLAMA_HOST = os.Getenv("OLLAMA_HOST")
+	OLLAMA_PORT = os.Getenv("OLLAMA_PORT")
 }
