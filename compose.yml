@@ -33,5 +33,22 @@ services:
       timeout: 5s
       retries: 55
 
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    ports:
+      - 7869:11434
+    volumes:
+      - ./volumes/ollama:/root/.ollama
+      - ./ai:/models
+    pull_policy: always
+    tty: true
+    restart: always
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - server_client
+
 networks:
   server_client:
