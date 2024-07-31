@@ -64,9 +64,13 @@ func (r *userRepository) GetUserByUsername(username string) (*models.User, error
 }
 
 func (r *userRepository) UpdateUser(userBody *models.UpdateUserBody) (*models.User, error) {
+	hash, err := models.HashPassword(userBody.Password)
+	if err != nil {
+		return nil, err
+	}
 	user := &models.User{
 		Username: userBody.Username,
-		Password: userBody.Password,
+		Password: hash,
 	}
 	res := r.DB.Model(&models.User{}).Where("id = ?", userBody.ID).Updates(user)
 	if res.Error != nil {
@@ -76,6 +80,10 @@ func (r *userRepository) UpdateUser(userBody *models.UpdateUserBody) (*models.Us
 }
 
 func (r *userRepository) DeleteUser(id int) error {
+	_, err := r.GetUser(id)
+	if err != nil {
+		return err
+	}
 	res := r.DB.Delete(&models.User{}, id)
 	if res.Error != nil {
 		return res.Error
