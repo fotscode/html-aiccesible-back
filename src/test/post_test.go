@@ -507,12 +507,45 @@ func TestDeletePost(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := routes.SetUpRouter()
 
-	tests := []TestBody[string]{}
+	_, token := login(t, r, false)
+	post := createPost(t, r, token)
+	postOther := createPost(t, r, token)
+	_, otherToken := login(t, r, false)
+
+	tests := []TestBody[string]{
+		{
+			Name:         "Delete post successfully",
+			Path:         fmt.Sprintf("/%d", post.ID),
+			Token:        token,
+			ExpectedCode: http.StatusOK,
+			RespContains: "Deleted post",
+		},
+		{
+			Name:         "Delete post with invalid ID",
+			Path:         "/invalid",
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Invalid ID",
+		},
+		{
+			Name:         "Delete post with no token",
+			Path:         fmt.Sprintf("/%d", post.ID),
+			ExpectedCode: http.StatusUnauthorized,
+			RespContains: "No token provided",
+		},
+		{
+			Name:         "Delete post with other user token",
+			Path:         fmt.Sprintf("/%d", postOther.ID),
+			Token:        otherToken,
+			ExpectedCode: http.StatusInternalServerError,
+			RespContains: "user is not the owner of the post",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			var res httputil.HTTPResponse[interface{}]
-			w := createRequest(t, r, http.MethodDelete, "/api/post/delete", test.Body, &res, test.Token)
+			w := createRequest(t, r, http.MethodDelete, "/api/post/delete"+test.Path, test.Body, &res, test.Token)
 			doAsserts(t, w, res, test)
 		})
 	}
