@@ -315,18 +315,18 @@ func TestGetUser(t *testing.T) {
 			RespContains: user.Username,
 			Path:         fmt.Sprintf("/%d", user.ID),
 		},
-        {
-            Name:         "Get user with not found id",
-            ExpectedCode: http.StatusNotFound,
-            RespContains: "record not found",
-            Path:         "/262144",
-        },
-        {
-            Name:         "Get user with invalid id",
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "Invalid",
-            Path:         "/invalid",
-        },
+		{
+			Name:         "Get user with not found id",
+			ExpectedCode: http.StatusNotFound,
+			RespContains: "record not found",
+			Path:         "/262144",
+		},
+		{
+			Name:         "Get user with invalid id",
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Invalid",
+			Path:         "/invalid",
+		},
 	}
 
 	for _, test := range tests {
@@ -338,4 +338,26 @@ func TestGetUser(t *testing.T) {
 		})
 	}
 
+}
+
+func TestListUsers(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := routes.SetUpRouter()
+
+	tests := []TestBody[string]{
+		{
+			Name:         "List users successfully",
+			ExpectedCode: http.StatusOK,
+			RespContains: "[",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			var res httputil.HTTPResponse[interface{}]
+			w := createRequest(t, r, http.MethodGet, "/api/user/list", test.Body, &res, test.Token)
+			doAsserts(t, w, res, test)
+
+		})
+	}
 }
