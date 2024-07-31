@@ -3,7 +3,9 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"html-aiccesible/constants"
 	"html-aiccesible/httputil"
+	"html-aiccesible/models"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -20,6 +22,7 @@ type TestBody[T any] struct {
 	ExpectedCode int
 	RespContains string
 	Token        string
+	Path         string
 }
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -62,4 +65,47 @@ func doAsserts[T any, K any](t *testing.T, w *httptest.ResponseRecorder, expecte
 		bufStr := string(buf)
 		assert.Contains(t, bufStr, test.RespContains)
 	}
+}
+
+func createUser(t *testing.T, r *gin.Engine, username, password string) *models.User {
+	var res httputil.HTTPResponse[*models.User]
+	w := createRequest(t, r, http.MethodPost, "/api/user/add", models.CreateUserBody{
+		Username: username,
+		Password: password,
+	}, &res, "")
+
+	if w.Code != http.StatusCreated {
+		t.Errorf("Expected %d but got %d", http.StatusCreated, res.Code)
+	}
+
+	return res.Data
+}
+
+func login(t *testing.T, r *gin.Engine, isAdmin bool) (*models.User, string) {
+	randomString := generateRandomString(20)
+	username := constants.ADMIN_USERNAME
+	password := constants.ADMIN_PASSWORD
+	var user *models.User
+	if !isAdmin {
+		username = randomString
+		password = "password"
+		user = createUser(t, r, username, password)
+	} else {
+		models.CreateDefaultUser()
+		user = &models.User{
+			Username: username,
+			Password: password,
+		}
+
+	}
+	var loginRes httputil.HTTPResponse[models.LoginResponse]
+	w := createRequest(t, r, http.MethodPost, "/api/user/login", models.LoginUserBody{
+		Username: username,
+		Password: password,
+	}, &loginRes, "")
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %d but got %d", http.StatusOK, w.Code)
+	}
+	return user, loginRes.Data.Token
 }
