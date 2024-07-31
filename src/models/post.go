@@ -16,14 +16,14 @@ type Post struct {
 type CreatePostBody struct {
 	Title       string `json:"title" binding:"required,min=4,max=100"`
 	Description string `json:"description" binding:"required,min=4,max=100"`
-	Before      string `json:"before" binding:"required,min=4,max=100"`
-	After       string `json:"after" binding:"required,min=4,max=100"`
+	Before      string `json:"before" binding:"required,min=4,max=8192"`
+	After       string `json:"after" binding:"required,min=4,max=8192"`
 }
 
 type UpdatePostBody struct {
 	ID          uint   `json:"id" binding:"required"`
 	Title       string `json:"title" binding:"required,min=4,max=100"`
 	Description string `json:"description" binding:"required,min=4,max=100"`
-	Before      string `json:"before" binding:"required,min=4,max=100"`
-	After       string `json:"after" binding:"required,min=4,max=100"`
+	Before      string `json:"before" binding:"required,min=4,max=8192"`
+	After       string `json:"after" binding:"required,min=4,max=8192"`
 }
