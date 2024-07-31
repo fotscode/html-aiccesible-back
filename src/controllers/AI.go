@@ -33,7 +33,7 @@ func (b *Controller) ListModels(c *gin.Context) {
 		value := value.(map[string]interface{})
 		respArr = append(respArr, strings.Split(value["name"].(string), ":")[0])
 	}
-	c.JSON(http.StatusOK, respArr)
+	httputil.OK(c, respArr)
 }
 
 func (b *Controller) Accesibilize(c *gin.Context) {
