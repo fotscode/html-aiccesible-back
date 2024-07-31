@@ -116,15 +116,6 @@ func TestUpdateUser(t *testing.T) {
 	r := routes.SetUpRouter()
 
 	randomString := generateRandomString(10)
-	var res httputil.HTTPResponse[*models.User]
-	w := createRequest(t, r, http.MethodPost, "/api/user/add", models.CreateUserBody{
-		Username: "userUpdate" + randomString,
-		Password: "password",
-	}, &res, "")
-
-	if w.Code != http.StatusCreated {
-		t.Errorf("Expected %d but got %d", http.StatusCreated, res.Code)
-	}
 
 	var resExists httputil.HTTPResponse[*models.User]
 	createRequest(t, r, http.MethodPost, "/api/user/add", models.CreateUserBody{
@@ -132,24 +123,14 @@ func TestUpdateUser(t *testing.T) {
 		Password: "password",
 	}, &resExists, "")
 
-	var loginRes httputil.HTTPResponse[*models.LoginResponse]
-	w = createRequest(t, r, http.MethodPost, "/api/user/login", models.LoginUserBody{
-		Username: "userUpdate" + randomString,
-		Password: "password",
-	}, &loginRes, "")
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected %d but got %d", http.StatusOK, w.Code)
-	}
-
-	token := loginRes.Data.Token
+	user, token := login(t, r, false)
 
 	updateRandomString := generateRandomString(10)
 	tests := []TestBody[models.UpdateUserBody]{
 		{
 			Name: "Update user successfully",
 			Body: models.UpdateUserBody{
-				ID:       res.Data.ID,
+				ID:       user.ID,
 				Username: "userUpdate" + updateRandomString,
 				Password: "password",
 			},
@@ -160,7 +141,7 @@ func TestUpdateUser(t *testing.T) {
 		{
 			Name: "Update user with empty username",
 			Body: models.UpdateUserBody{
-				ID:       res.Data.ID,
+				ID:       user.ID,
 				Password: "password",
 			},
 			ExpectedCode: http.StatusBadRequest,
@@ -170,7 +151,7 @@ func TestUpdateUser(t *testing.T) {
 		{
 			Name: "Update user with empty password",
 			Body: models.UpdateUserBody{
-				ID:       res.Data.ID,
+				ID:       user.ID,
 				Username: "userUpdate" + updateRandomString,
 			},
 			ExpectedCode: http.StatusBadRequest,
@@ -194,7 +175,7 @@ func TestUpdateUser(t *testing.T) {
 		{
 			Name: "Update user with username less than 4 characters",
 			Body: models.UpdateUserBody{
-				ID:       res.Data.ID,
+				ID:       user.ID,
 				Username: "tes",
 				Password: "password",
 			},
@@ -205,7 +186,7 @@ func TestUpdateUser(t *testing.T) {
 		{
 			Name: "Update user with password less than 8 characters",
 			Body: models.UpdateUserBody{
-				ID:       res.Data.ID,
+				ID:       user.ID,
 				Username: "userUpdate" + updateRandomString,
 				Password: "passwor",
 			},
@@ -216,7 +197,7 @@ func TestUpdateUser(t *testing.T) {
 		{
 			Name: "Update user with username longer than 20 characters",
 			Body: models.UpdateUserBody{
-				ID:       res.Data.ID,
+				ID:       user.ID,
 				Username: generateRandomString(21),
 				Password: "password",
 			},
@@ -227,7 +208,7 @@ func TestUpdateUser(t *testing.T) {
 		{
 			Name: "Update user with password longer than 20 characters",
 			Body: models.UpdateUserBody{
-				ID:       res.Data.ID,
+				ID:       user.ID,
 				Username: "userUpdate" + updateRandomString,
 				Password: generateRandomString(21),
 			},
@@ -238,7 +219,7 @@ func TestUpdateUser(t *testing.T) {
 		{
 			Name: "Update user with username that already exists",
 			Body: models.UpdateUserBody{
-				ID:       res.Data.ID,
+				ID:       user.ID,
 				Username: "exists" + randomString,
 				Password: "password",
 			},
@@ -246,17 +227,17 @@ func TestUpdateUser(t *testing.T) {
 			RespContains: "Duplicate entry",
 			Token:        token,
 		},
-        {
-            Name: "Update non logged in user",
-            Body: models.UpdateUserBody{
-                ID:       resExists.Data.ID,
-                Username: "exists" + updateRandomString,
-                Password: "password",
-            },
-            ExpectedCode: http.StatusUnauthorized,
-            RespContains: "You are not authorized",
-            Token:        token,
-        },
+		{
+			Name: "Update non logged in user",
+			Body: models.UpdateUserBody{
+				ID:       resExists.Data.ID,
+				Username: "exists" + updateRandomString,
+				Password: "password",
+			},
+			ExpectedCode: http.StatusUnauthorized,
+			RespContains: "You are not authorized",
+			Token:        token,
+		},
 	}
 
 	for _, test := range tests {
@@ -268,4 +249,55 @@ func TestUpdateUser(t *testing.T) {
 		})
 	}
 
+}
+
+func TestDeleteUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := routes.SetUpRouter()
+
+	_, tokenAdmin := login(t, r, true)
+	randomString := generateRandomString(10)
+	userDelete := createUser(t, r, "delete-"+randomString, "password")
+
+	_, tokenRegular := login(t, r, false)
+
+	tests := []TestBody[string]{
+		{
+			Name:         "Delete user successfully",
+			ExpectedCode: http.StatusOK,
+			RespContains: "",
+			Token:        tokenAdmin,
+			Path:         fmt.Sprintf("/%d", userDelete.ID),
+		},
+		{
+			Name:         "Delete user with not found id",
+			ExpectedCode: http.StatusInternalServerError,
+			RespContains: "record not found",
+			Token:        tokenAdmin,
+			Path:         "/262144",
+		},
+		{
+			Name:         "Delete user with invalid id",
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Invalid",
+			Token:        tokenAdmin,
+			Path:         "/invalid",
+		},
+		{
+			Name:         "Delete user with regular user",
+			ExpectedCode: http.StatusForbidden,
+			RespContains: "You are not allowed",
+			Token:        tokenRegular,
+			Path:         fmt.Sprintf("/%d", userDelete.ID),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			var res httputil.HTTPResponse[interface{}]
+			w := createRequest(t, r, http.MethodDelete, "/api/user/delete"+test.Path, test.Body, &res, test.Token)
+			doAsserts(t, w, res, test)
+
+		})
+	}
 }
