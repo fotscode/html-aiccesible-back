@@ -1,3 +1,4 @@
 *.env
 volumes/
 src/tmp
+src/run_tests.sh
