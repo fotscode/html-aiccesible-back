@@ -23,6 +23,11 @@ func (b *Controller) CreateUser(c *gin.Context) {
 
 func (b *Controller) UpdateUser(c *gin.Context) {
 	body := c.MustGet(gin.BindKey).(*models.UpdateUserBody)
+	user := c.MustGet("user").(*models.User)
+	if user.ID != body.ID {
+		httputil.Unauthorized[string](c, "You are not authorized to update this user")
+		return
+	}
 	user, err := b.UserRepo.UpdateUser(body)
 	if err != nil {
 		httputil.InternalServerError[string](c, err.Error())
