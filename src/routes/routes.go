@@ -47,6 +47,11 @@ func SetUpRouter() *gin.Engine {
 			comment.DELETE("/delete/:id", m.GetOptions(), c.DeleteComment)
 			comment.GET("/list/:id", m.GetOptions(), m.ListOptions(), c.ListComments)
 		}
+		AI := api.Group("/models")
+		{
+			AI.GET("/list", c.ListModels)
+			AI.POST("/accesibilize", gin.Bind(models.AccesibilizeBody{}), c.Accesibilize)
+		}
 	}
 	return r
 }
