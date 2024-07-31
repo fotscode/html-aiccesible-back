@@ -301,3 +301,41 @@ func TestDeleteUser(t *testing.T) {
 		})
 	}
 }
+
+func TestGetUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := routes.SetUpRouter()
+
+	user, _ := login(t, r, false)
+
+	tests := []TestBody[string]{
+		{
+			Name:         "Get user successfully",
+			ExpectedCode: http.StatusOK,
+			RespContains: user.Username,
+			Path:         fmt.Sprintf("/%d", user.ID),
+		},
+        {
+            Name:         "Get user with not found id",
+            ExpectedCode: http.StatusNotFound,
+            RespContains: "record not found",
+            Path:         "/262144",
+        },
+        {
+            Name:         "Get user with invalid id",
+            ExpectedCode: http.StatusBadRequest,
+            RespContains: "Invalid",
+            Path:         "/invalid",
+        },
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			var res httputil.HTTPResponse[interface{}]
+			w := createRequest(t, r, http.MethodGet, "/api/user/get"+test.Path, test.Body, &res, test.Token)
+			doAsserts(t, w, res, test)
+
+		})
+	}
+
+}
