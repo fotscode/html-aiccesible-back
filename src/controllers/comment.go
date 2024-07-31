@@ -58,5 +58,5 @@ func (b *Controller) DeleteComment(c *gin.Context) {
 		httputil.NotFound(c, err)
 		return
 	}
-	httputil.NoContent(c, "Deleted comment successfully")
+	httputil.OK(c, "Deleted comment successfully")
 }

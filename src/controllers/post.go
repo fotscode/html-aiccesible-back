@@ -47,7 +47,7 @@ func (b *Controller) DeletePost(c *gin.Context) {
 		httputil.NotFound(c, err.Error())
 		return
 	}
-	httputil.NoContent(c, "Deleted post successfully")
+	httputil.OK(c, "Deleted post successfully")
 }
 
 func (b *Controller) ListPosts(c *gin.Context) {
@@ -68,7 +68,7 @@ func (b *Controller) LikePost(c *gin.Context) {
 		httputil.InternalServerError(c, err.Error())
 		return
 	}
-	httputil.NoContent(c, "Liked post successfully")
+	httputil.OK(c, "Liked post successfully")
 }
 
 func (b *Controller) GetPostLikes(c *gin.Context) {
