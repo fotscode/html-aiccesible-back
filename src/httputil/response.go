@@ -26,7 +26,7 @@ func OK[T any](c *gin.Context, data T) {
 }
 
 func Created[T any](c *gin.Context, data T) {
-	c.JSON(http.StatusCreated, newHTTPResponse(http.StatusOK, data))
+	c.JSON(http.StatusCreated, newHTTPResponse(http.StatusCreated, data))
 }
 
 func NoContent[T any](c *gin.Context, data T) {
