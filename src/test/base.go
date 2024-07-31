@@ -19,6 +19,7 @@ type TestBody[T any] struct {
 	Body         T
 	ExpectedCode int
 	RespContains string
+	Token        string
 }
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -33,10 +34,13 @@ func generateRandomString(length int) string {
 	return string(b)
 }
 
-func createRequest[T any, R any](t *testing.T, r *gin.Engine, method, path string, body T, expected *httputil.HTTPResponse[R]) *httptest.ResponseRecorder {
+func createRequest[T any, R any](t *testing.T, r *gin.Engine, method, path string, body T, expected *httputil.HTTPResponse[R], token string) *httptest.ResponseRecorder {
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(body)
 	req, err := http.NewRequest(method, path, buf)
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
