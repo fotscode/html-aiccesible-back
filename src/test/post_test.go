@@ -162,102 +162,102 @@ func TestAddPost(t *testing.T) {
 			ExpectedCode: http.StatusBadRequest,
 			RespContains: "{\"After\":\"After is required\",\"Before\":\"Before is required\",\"Description\":\"Description is required\",\"Title\":\"Title is required\"}",
 		},
-        {
-            Name: "Add post with title length less than 4",
-            Body: models.CreatePostBody{
-                Title:       "abc",
-                Description: description,
-                Before:      before,
-                After:       after,
-            },
-            Token:        token,
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "Title must be longer than 4",
-        },
-        {
-            Name: "Add post with description length less than 4",
-            Body: models.CreatePostBody{
-                Title:       title,
-                Description: "abc",
-                Before:      before,
-                After:       after,
-            },
-            Token:        token,
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "Description must be longer than 4",
-        },
-        {
-            Name: "Add post with before length less than 4",
-            Body: models.CreatePostBody{
-                Title:       title,
-                Description: description,
-                Before:      "abc",
-                After:       after,
-            },
-            Token:        token,
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "Before must be longer than 4",
-        },
-        {
-            Name: "Add post with after length less than 4",
-            Body: models.CreatePostBody{
-                Title:       title,
-                Description: description,
-                Before:      before,
-                After:       "abc",
-            },
-            Token:        token,
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "After must be longer than 4",
-        },
-        {
-            Name: "Add post with title length more than 100",
-            Body: models.CreatePostBody{
-                Title:       generateRandomString(101),
-                Description: description,
-                Before:      before,
-                After:       after,
-            },
-            Token:        token,
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "Title cannot be longer than 100",
-        },
-        {
-            Name: "Add post with description length more than 100",
-            Body: models.CreatePostBody{
-                Title:       title,
-                Description: generateRandomString(101),
-                Before:      before,
-                After:       after,
-            },
-            Token:        token,
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "Description cannot be longer than 100",
-        },
-        {
-            Name: "Add post with before length more than 8192",
-            Body: models.CreatePostBody{
-                Title:       title,
-                Description: description,
-                Before:      generateRandomString(8193),
-                After:       after,
-            },
-            Token:        token,
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "Before cannot be longer than 8192",
-        },
-        {
-            Name: "Add post with after length more than 8192",
-            Body: models.CreatePostBody{
-                Title:       title,
-                Description: description,
-                Before:      before,
-                After:       generateRandomString(8193),
-            },
-            Token:        token,
-            ExpectedCode: http.StatusBadRequest,
-            RespContains: "After cannot be longer than 8192",
-        },
+		{
+			Name: "Add post with title length less than 4",
+			Body: models.CreatePostBody{
+				Title:       "abc",
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title must be longer than 4",
+		},
+		{
+			Name: "Add post with description length less than 4",
+			Body: models.CreatePostBody{
+				Title:       title,
+				Description: "abc",
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Description must be longer than 4",
+		},
+		{
+			Name: "Add post with before length less than 4",
+			Body: models.CreatePostBody{
+				Title:       title,
+				Description: description,
+				Before:      "abc",
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Before must be longer than 4",
+		},
+		{
+			Name: "Add post with after length less than 4",
+			Body: models.CreatePostBody{
+				Title:       title,
+				Description: description,
+				Before:      before,
+				After:       "abc",
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "After must be longer than 4",
+		},
+		{
+			Name: "Add post with title length more than 100",
+			Body: models.CreatePostBody{
+				Title:       generateRandomString(101),
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title cannot be longer than 100",
+		},
+		{
+			Name: "Add post with description length more than 100",
+			Body: models.CreatePostBody{
+				Title:       title,
+				Description: generateRandomString(101),
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Description cannot be longer than 100",
+		},
+		{
+			Name: "Add post with before length more than 8192",
+			Body: models.CreatePostBody{
+				Title:       title,
+				Description: description,
+				Before:      generateRandomString(8193),
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Before cannot be longer than 8192",
+		},
+		{
+			Name: "Add post with after length more than 8192",
+			Body: models.CreatePostBody{
+				Title:       title,
+				Description: description,
+				Before:      before,
+				After:       generateRandomString(8193),
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "After cannot be longer than 8192",
+		},
 	}
 
 	for _, test := range tests {
@@ -273,7 +273,226 @@ func TestUpdatePost(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := routes.SetUpRouter()
 
-	tests := []TestBody[models.UpdatePostBody]{}
+	_, token := login(t, r, false)
+	title := generateRandomString(10)
+	description := generateRandomString(10)
+	before := generateRandomString(10)
+	after := generateRandomString(10)
+	post := createPost(t, r, token)
+
+	_, otherToken := login(t, r, false)
+
+	tests := []TestBody[models.UpdatePostBody]{
+		{
+			Name: "Update post successfully",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusOK,
+			RespContains: title,
+		},
+		{
+			Name: "Update post with other user token",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			Token:        otherToken,
+			ExpectedCode: http.StatusInternalServerError,
+			RespContains: "user is not the owner of the post",
+		},
+		{
+			Name: "Update post with no token",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			ExpectedCode: http.StatusUnauthorized,
+			RespContains: "No token provided",
+		},
+		{
+			Name: "Update post with no ID",
+			Body: models.UpdatePostBody{
+				Title:       title,
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "ID is required",
+		},
+		{
+			Name: "Update post with no title",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title is required",
+		},
+		{
+			Name: "Update post with no description",
+			Body: models.UpdatePostBody{
+				ID:     post.ID,
+				Title:  title,
+				Before: before,
+				After:  after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Description is required",
+		},
+		{
+			Name: "Update post with no before",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Before is required",
+		},
+		{
+			Name: "Update post with no after",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				Before:      before,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "After is required",
+		},
+		{
+			Name:         "Update empty post",
+			Body:         models.UpdatePostBody{},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "{\"After\":\"After is required\",\"Before\":\"Before is required\",\"Description\":\"Description is required\",\"ID\":\"ID is required\",\"Title\":\"Title is required\"}",
+		},
+		{
+			Name: "Update post with title length less than 4",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       "abc",
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title must be longer than 4",
+		},
+		{
+			Name: "Update post with description length less than 4",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: "abc",
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Description must be longer than 4",
+		},
+		{
+			Name: "Update post with before length less than 4",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				Before:      "abc",
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Before must be longer than 4",
+		},
+		{
+			Name: "Update post with after length less than 4",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				Before:      before,
+				After:       "abc",
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "After must be longer than 4",
+		},
+		{
+			Name: "Update post with title length more than 100",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       generateRandomString(101),
+				Description: description,
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title cannot be longer than 100",
+		},
+		{
+			Name: "Update post with description length more than 100",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: generateRandomString(101),
+				Before:      before,
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Description cannot be longer than 100",
+		},
+		{
+			Name: "Update post with before length more than 8192",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				Before:      generateRandomString(8193),
+				After:       after,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Before cannot be longer than 8192",
+		},
+		{
+			Name: "Update post with after length more than 8192",
+			Body: models.UpdatePostBody{
+				ID:          post.ID,
+				Title:       title,
+				Description: description,
+				Before:      before,
+				After:       generateRandomString(8193),
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "After cannot be longer than 8192",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
