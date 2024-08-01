@@ -385,7 +385,35 @@ func TestDeleteComment(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := routes.SetUpRouter()
 
-	tests := []TestBody[string]{}
+	_, token := login(t, r, false)
+	post := createPost(t, r, token)
+	comment := createComment(t, r, post.ID, token)
+	otherComment := createComment(t, r, post.ID, token)
+	_, otherToken := login(t, r, false)
+
+	tests := []TestBody[string]{
+		{
+			Name:         "Delete comment successfully",
+			Path:         fmt.Sprintf("/%d", comment.ID),
+			Token:        token,
+			ExpectedCode: http.StatusOK,
+			RespContains: "Deleted comment",
+		},
+		{
+			Name:         "Delete comment by other user",
+			Path:         fmt.Sprintf("/%d", otherComment.ID),
+			Token:        otherToken,
+			ExpectedCode: http.StatusInternalServerError,
+			RespContains: "",
+		},
+		{
+			Name:         "Delete comment invalid id",
+			Path:         "/262144",
+			Token:        token,
+			ExpectedCode: http.StatusInternalServerError,
+			RespContains: "",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
