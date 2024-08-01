@@ -66,7 +66,37 @@ func TestListComment(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := routes.SetUpRouter()
 
-	tests := []TestBody[string]{}
+	_, token := login(t, r, false)
+	post := createPost(t, r, token)
+	comment1 := createComment(t, r, post.ID, token)
+	comment2 := createComment(t, r, post.ID, token)
+
+	tests := []TestBody[string]{
+		{
+			Name:         "List comments successfully pt1",
+			Path:         fmt.Sprintf("/%d", post.ID),
+			ExpectedCode: http.StatusOK,
+			RespContains: comment1.Title,
+		},
+		{
+			Name:         "List comments successfully pt2",
+			Path:         fmt.Sprintf("/%d", post.ID),
+			ExpectedCode: http.StatusOK,
+			RespContains: comment2.Title,
+		},
+		{
+			Name:         "List comments invalid id",
+			Path:         "/invalid",
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Invalid ID",
+		},
+		{
+			Name:         "List comments id not found",
+			Path:         "/262144",
+			ExpectedCode: http.StatusNotFound,
+			RespContains: "",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
