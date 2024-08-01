@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html-aiccesible/httputil"
 	"html-aiccesible/models"
+	"html-aiccesible/repositories"
 	routes "html-aiccesible/routes"
 	"net/http"
 	"testing"
@@ -555,7 +556,31 @@ func TestLikePost(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := routes.SetUpRouter()
 
-	tests := []TestBody[string]{}
+	_, token := login(t, r, false)
+	post := createPost(t, r, token)
+
+	tests := []TestBody[string]{
+		{
+			Name:         "Like post successfully",
+			Path:         fmt.Sprintf("/%d", post.ID),
+			Token:        token,
+			ExpectedCode: http.StatusOK,
+			RespContains: "Toggle like post successfully",
+		},
+		{
+			Name:         "Like post with invalid ID",
+			Path:         "/invalid",
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Invalid ID",
+		},
+		{
+			Name:         "Like post with no token",
+			Path:         fmt.Sprintf("/%d", post.ID),
+			ExpectedCode: http.StatusUnauthorized,
+			RespContains: "No token provided",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
@@ -564,13 +589,40 @@ func TestLikePost(t *testing.T) {
 			doAsserts(t, w, res, test)
 		})
 	}
+
+	db := models.GetDB()
+	searchPost, err := repositories.PostRepo(db).GetPost(int(post.ID))
+	if err != nil {
+		t.Errorf("Error: %v", err)
+	}
+	if len(searchPost.Likes) != 1 {
+		t.Errorf("Expected 1 but got %d", len(searchPost.Likes))
+	}
 }
 
 func TestGetLikePost(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := routes.SetUpRouter()
 
-	tests := []TestBody[string]{}
+	_, token := login(t, r, false)
+	post := createPost(t, r, token)
+
+	tests := []TestBody[string]{
+		{
+			Name:         "Get like post successfully",
+			Path:         fmt.Sprintf("/%d", post.ID),
+			Token:        token,
+			ExpectedCode: http.StatusOK,
+			RespContains: "0",
+		},
+		{
+			Name:         "Get like post with invalid ID",
+			Path:         "/invalid",
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Invalid ID",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
@@ -578,5 +630,42 @@ func TestGetLikePost(t *testing.T) {
 			w := createRequest(t, r, http.MethodGet, "/api/post/likes"+test.Path, test.Body, &res, test.Token)
 			doAsserts(t, w, res, test)
 		})
+	}
+
+	likePost(t, r, token, post.ID)
+	_, otherToken := login(t, r, false)
+	likePost(t, r, otherToken, post.ID)
+
+	test := TestBody[string]{
+		Name:         "Get like post successfully with like",
+		Path:         fmt.Sprintf("/%d", post.ID),
+		Token:        token,
+		ExpectedCode: http.StatusOK,
+		RespContains: "2",
+	}
+
+	t.Run(test.Name, func(t *testing.T) {
+		var res httputil.HTTPResponse[interface{}]
+		w := createRequest(t, r, http.MethodGet, "/api/post/likes"+test.Path, test.Body, &res, test.Token)
+		doAsserts(t, w, res, test)
+	})
+
+	likePost(t, r, otherToken, post.ID)
+
+	test.RespContains = "1"
+
+	t.Run(test.Name, func(t *testing.T) {
+		var res httputil.HTTPResponse[interface{}]
+		w := createRequest(t, r, http.MethodGet, "/api/post/likes"+test.Path, test.Body, &res, test.Token)
+		doAsserts(t, w, res, test)
+	})
+
+}
+
+func likePost(t *testing.T, r *gin.Engine, token string, postID uint) {
+	var res httputil.HTTPResponse[interface{}]
+	w := createRequest(t, r, http.MethodPatch, fmt.Sprintf("/api/post/like/%d", postID), "", &res, token)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %d but got %d", http.StatusOK, res.Code)
 	}
 }
