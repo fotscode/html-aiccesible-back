@@ -15,7 +15,7 @@ func (b *Controller) CreateComment(c *gin.Context) {
 		httputil.InternalServerError(c, err)
 		return
 	}
-	httputil.OK(c, comment)
+	httputil.Created(c, comment)
 }
 
 func (b *Controller) UpdateComment(c *gin.Context) {
@@ -32,6 +32,11 @@ func (b *Controller) UpdateComment(c *gin.Context) {
 func (b *Controller) ListComments(c *gin.Context) {
 	lo := c.MustGet("lo").(*m.ListOptions)
 	getOpt := c.MustGet("getOpt").(*m.GetOptions)
+	_, err := b.PostRepo.GetPost(getOpt.Id)
+	if err != nil {
+		httputil.NotFound(c, err)
+		return
+	}
 	comments, err := b.CommentRepo.ListComments(lo.Page, lo.Size, getOpt.Id)
 	if err != nil {
 		httputil.InternalServerError(c, err)
@@ -55,8 +60,8 @@ func (b *Controller) DeleteComment(c *gin.Context) {
 	user := c.MustGet("user").(*m.User)
 	err := b.CommentRepo.DeleteComment(user, getOpt.Id)
 	if err != nil {
-		httputil.NotFound(c, err)
+		httputil.InternalServerError(c, err)
 		return
 	}
-	httputil.NoContent(c, "Deleted comment successfully")
+	httputil.OK(c, "Deleted comment successfully")
 }

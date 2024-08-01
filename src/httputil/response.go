@@ -29,10 +29,6 @@ func Created[T any](c *gin.Context, data T) {
 	c.JSON(http.StatusCreated, newHTTPResponse(http.StatusCreated, data))
 }
 
-func NoContent[T any](c *gin.Context, data T) {
-	c.AbortWithStatusJSON(http.StatusNoContent, newHTTPResponse(http.StatusNoContent, data))
-}
-
 func BadRequest[T any](c *gin.Context, data T) {
 	c.AbortWithStatusJSON(http.StatusBadRequest, newHTTPResponse(http.StatusBadRequest, data))
 }

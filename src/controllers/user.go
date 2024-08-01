@@ -53,7 +53,7 @@ func (b *Controller) DeleteUser(c *gin.Context) {
 		httputil.InternalServerError[string](c, err.Error())
 		return
 	}
-	httputil.NoContent[string](c, "Deleted user successfully")
+	httputil.OK[string](c, "Deleted user successfully")
 }
 
 func (b *Controller) ListUsers(c *gin.Context) {
