@@ -37,7 +37,7 @@ func SetUpRouter() *gin.Engine {
 			post.PATCH("/like/:id", m.Auth(c), m.GetOptions(), c.LikePost)
 			post.GET("/likes/:id", m.GetOptions(), c.GetPostLikes)
 		}
-		comment := api.Group("/comment", m.Auth(c))
+		comment := api.Group("/comment")
 		{
 			comment.POST("/add", m.Auth(c), gin.Bind(models.CreateCommentBody{}), c.CreateComment)
 			comment.PUT("/update", m.Auth(c), gin.Bind(models.UpdateCommentBody{}), c.UpdateComment)
