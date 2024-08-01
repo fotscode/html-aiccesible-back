@@ -68,7 +68,7 @@ func (b *Controller) LikePost(c *gin.Context) {
 		httputil.InternalServerError(c, err.Error())
 		return
 	}
-	httputil.OK(c, "Liked post successfully")
+	httputil.OK(c, "Toggle like post successfully")
 }
 
 func (b *Controller) GetPostLikes(c *gin.Context) {
