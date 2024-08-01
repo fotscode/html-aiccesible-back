@@ -111,7 +111,118 @@ func TestCreateComment(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := routes.SetUpRouter()
 
-	tests := []TestBody[models.CreateCommentBody]{}
+	_, token := login(t, r, false)
+	post := createPost(t, r, token)
+
+	title := generateRandomString(10)
+	content := generateRandomString(10)
+	tests := []TestBody[models.CreateCommentBody]{
+		{
+			Name: "Create comment successfully",
+			Body: models.CreateCommentBody{
+				PostID:  post.ID,
+				Title:   title,
+				Content: content,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusCreated,
+			RespContains: title,
+		},
+		{
+			Name: "Create comment invalid post id",
+			Body: models.CreateCommentBody{
+				PostID:  262144,
+				Title:   title,
+				Content: content,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusInternalServerError,
+			RespContains: "",
+		},
+		{
+			Name: "Create comment no title",
+			Body: models.CreateCommentBody{
+				PostID:  post.ID,
+				Content: content,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title is required",
+		},
+		{
+			Name: "Create comment no content",
+			Body: models.CreateCommentBody{
+				PostID: post.ID,
+				Title:  title,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Content is required",
+		},
+		{
+			Name: "Create comment no title and content",
+			Body: models.CreateCommentBody{
+				PostID: post.ID,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "\"Content\":\"Content is required\",\"Title\":\"Title is required\"",
+		},
+		{
+			Name: "Create comment no token",
+			Body: models.CreateCommentBody{
+				PostID:  post.ID,
+				Title:   title,
+				Content: content,
+			},
+			ExpectedCode: http.StatusUnauthorized,
+			RespContains: "No token provided",
+		},
+		{
+			Name: "Create comment with title less than 5",
+			Body: models.CreateCommentBody{
+				PostID:  post.ID,
+				Title:   "1234",
+				Content: content,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title must be longer than 5",
+		},
+		{
+			Name: "Create comment with content less than 5",
+			Body: models.CreateCommentBody{
+				PostID:  post.ID,
+				Title:   title,
+				Content: "1234",
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Content must be longer than 5",
+		},
+		{
+			Name: "Create comment with title more than 100",
+			Body: models.CreateCommentBody{
+				PostID:  post.ID,
+				Title:   generateRandomString(101),
+				Content: content,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title cannot be longer than 100",
+		},
+		{
+			Name: "Create comment with content more than 1000",
+			Body: models.CreateCommentBody{
+				PostID:  post.ID,
+				Title:   title,
+				Content: generateRandomString(1001),
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Content cannot be longer than 1000",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
