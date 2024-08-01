@@ -32,6 +32,11 @@ func (b *Controller) UpdateComment(c *gin.Context) {
 func (b *Controller) ListComments(c *gin.Context) {
 	lo := c.MustGet("lo").(*m.ListOptions)
 	getOpt := c.MustGet("getOpt").(*m.GetOptions)
+	_, err := b.PostRepo.GetPost(getOpt.Id)
+	if err != nil {
+		httputil.NotFound(c, err)
+		return
+	}
 	comments, err := b.CommentRepo.ListComments(lo.Page, lo.Size, getOpt.Id)
 	if err != nil {
 		httputil.InternalServerError(c, err)
