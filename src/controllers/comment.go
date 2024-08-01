@@ -60,7 +60,7 @@ func (b *Controller) DeleteComment(c *gin.Context) {
 	user := c.MustGet("user").(*m.User)
 	err := b.CommentRepo.DeleteComment(user, getOpt.Id)
 	if err != nil {
-		httputil.NotFound(c, err)
+		httputil.InternalServerError(c, err)
 		return
 	}
 	httputil.OK(c, "Deleted comment successfully")
