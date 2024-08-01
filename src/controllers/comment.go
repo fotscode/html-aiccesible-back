@@ -15,7 +15,7 @@ func (b *Controller) CreateComment(c *gin.Context) {
 		httputil.InternalServerError(c, err)
 		return
 	}
-	httputil.OK(c, comment)
+	httputil.Created(c, comment)
 }
 
 func (b *Controller) UpdateComment(c *gin.Context) {
