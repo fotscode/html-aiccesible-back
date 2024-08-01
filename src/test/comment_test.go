@@ -237,7 +237,140 @@ func TestUpdateComment(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := routes.SetUpRouter()
 
-	tests := []TestBody[models.UpdateCommentBody]{}
+	_, token := login(t, r, false)
+	post := createPost(t, r, token)
+	comment := createComment(t, r, post.ID, token)
+	updatedTitle := generateRandomString(10)
+	updatedContent := generateRandomString(10)
+	_, otherToken := login(t, r, false)
+	tests := []TestBody[models.UpdateCommentBody]{
+		{
+			Name: "Update comment successfully",
+			Body: models.UpdateCommentBody{
+				ID:      comment.ID,
+				Title:   updatedTitle,
+				Content: updatedContent,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusOK,
+			RespContains: updatedTitle,
+		},
+		{
+			Name: "Update comment by other user",
+			Body: models.UpdateCommentBody{
+				ID:      comment.ID,
+				Title:   updatedTitle,
+				Content: updatedContent,
+			},
+			Token:        otherToken,
+			ExpectedCode: http.StatusInternalServerError,
+			RespContains: "",
+		},
+		{
+			Name: "Update comment invalid id",
+			Body: models.UpdateCommentBody{
+				ID:      262144,
+				Title:   updatedTitle,
+				Content: updatedContent,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusInternalServerError,
+			RespContains: "",
+		},
+		{
+			Name: "Update comment no ID",
+			Body: models.UpdateCommentBody{
+				Title:   updatedTitle,
+				Content: updatedContent,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "ID is required",
+		},
+		{
+			Name: "Update comment no title",
+			Body: models.UpdateCommentBody{
+				ID:      comment.ID,
+				Content: updatedContent,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title is required",
+		},
+		{
+			Name: "Update comment no content",
+			Body: models.UpdateCommentBody{
+				ID:    comment.ID,
+				Title: updatedTitle,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Content is required",
+		},
+		{
+			Name:         "Update comment no title and content",
+			Body:         models.UpdateCommentBody{},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "\"Content\":\"Content is required\",\"ID\":\"ID is required\",\"Title\":\"Title is required\"",
+		},
+		{
+			Name: "Update comment no token",
+			Body: models.UpdateCommentBody{
+				ID:      comment.ID,
+				Title:   updatedTitle,
+				Content: updatedContent,
+			},
+			ExpectedCode: http.StatusUnauthorized,
+			RespContains: "No token provided",
+		},
+		{
+			Name: "Update comment with title less than 5",
+			Body: models.UpdateCommentBody{
+				ID: comment.ID,
+
+				Title:   "1234",
+				Content: updatedContent,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title must be longer than 5",
+		},
+		{
+			Name: "Update comment with content less than 5",
+			Body: models.UpdateCommentBody{
+				ID: comment.ID,
+
+				Title:   updatedTitle,
+				Content: "1234",
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Content must be longer than 5",
+		},
+		{
+			Name: "Update comment with title more than 100",
+			Body: models.UpdateCommentBody{
+				ID:      comment.ID,
+				Title:   generateRandomString(101),
+				Content: updatedContent,
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Title cannot be longer than 100",
+		},
+		{
+			Name: "Update comment with content more than 1000",
+			Body: models.UpdateCommentBody{
+				ID:      comment.ID,
+				Title:   updatedTitle,
+				Content: generateRandomString(1001),
+			},
+			Token:        token,
+			ExpectedCode: http.StatusBadRequest,
+			RespContains: "Content cannot be longer than 1000",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
