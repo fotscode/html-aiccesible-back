@@ -2,6 +2,7 @@ package routes
 
 import (
 	"html-aiccesible/controllers"
+	"html-aiccesible/middleware"
 	m "html-aiccesible/middleware"
 	"html-aiccesible/models"
 
@@ -10,6 +11,7 @@ import (
 
 func SetUpRouter() *gin.Engine {
 	r := gin.Default()
+	r.Use(middleware.SetupCors())
 	c := controllers.NewController()
 	api := r.Group("/api", m.Errors(), m.JSONMiddleware())
 	{
