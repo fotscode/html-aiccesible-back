@@ -7,6 +7,7 @@ import (
 	"html-aiccesible/repositories"
 	routes "html-aiccesible/routes"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -64,7 +65,7 @@ func TestUpdateConfig(t *testing.T) {
 				SizeText:     config.SizeText + 1,
 			},
 			ExpectedCode: http.StatusOK,
-			RespContains: configStr(!config.ShowLikes, !config.ShowComments, config.Theme+"-test", config.Language+"-test", config.SizeTitle+1, config.SizeText+1),
+			RespContains: configStr(!config.ShowLikes, !config.ShowComments, config.Theme+"-test", config.Language+"-test", config.SizeTitle+1.0, config.SizeText+1.0),
 			Token:        token,
 		},
 		{
@@ -92,6 +93,6 @@ func TestUpdateConfig(t *testing.T) {
 	}
 }
 
-func configStr(showLikes, showComments bool, theme, language string, sizeTitle, sizeText int) string {
-	return fmt.Sprintf("\"language\":\"%s\",\"show_comments\":%t,\"show_likes\":%t,\"size_text\":%d,\"size_title\":%d,\"theme\":\"%s\"", language, showComments, showLikes, sizeText, sizeTitle, theme)
+func configStr(showLikes, showComments bool, theme, language string, sizeTitle, sizeText float32) string {
+	return fmt.Sprintf("\"language\":\"%s\",\"show_comments\":%t,\"show_likes\":%t,\"size_text\":%s,\"size_title\":%s,\"theme\":\"%s\"", language, showComments, showLikes, strconv.FormatFloat(float64(sizeText), 'f', -1, 32),strconv.FormatFloat(float64(sizeTitle), 'f', -1, 32), theme)
 }
